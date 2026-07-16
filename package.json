@@ -15,8 +15,8 @@
     "package:mac:unsigned": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --config.mac.identity=null",
     "package:mac:unsigned:zip": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip --config.mac.identity=null",
     "package:win": "npm run build && electron-builder --win",
-    "release:mac": "npm run build && electron-builder --mac --publish always",
-    "release:win": "npm run build && electron-builder --win --publish always",
+    "release:mac": "node scripts/release.js mac",
+    "release:win": "node scripts/release.js win",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

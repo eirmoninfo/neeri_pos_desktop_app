@@ -18,6 +18,15 @@ export interface UserBranchInfo {
   address_line2?: string;
 }
 
+export interface BranchItem {
+  id: number;
+  name: string;
+  address?: string;
+  location?: string;
+  suburb?: string;
+  city?: string;
+}
+
 export interface User {
   id: number;
   name: string;

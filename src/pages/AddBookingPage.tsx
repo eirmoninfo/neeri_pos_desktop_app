@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { bookingsApi } from "../api/bookingsApi";
+import { branchesApi, formatBranchLabel } from "../api/branchesApi";
 import { servicesApi } from "../api/servicesApi";
 import { useAuthStore } from "../store/authStore";
-import type { ServiceItem } from "../types";
+import type { BranchItem, ServiceItem } from "../types";
 
 const TIME_SLOTS = [
   "08:00",
@@ -52,6 +53,7 @@ export default function AddBookingPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const serviceSelectRef = useRef<HTMLSelectElement>(null);
+  const [branches, setBranches] = useState<BranchItem[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<number | "">(user?.branch_id ?? "");
   const [customerName, setCustomerName] = useState("");
@@ -64,6 +66,19 @@ export default function AddBookingPage() {
   const [date, setDate] = useState(todayISO);
   const [time, setTime] = useState("09:00");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    void branchesApi
+      .list({ per_page: 100 })
+      .then((rows) => {
+        const scopedRows =
+          user?.role === "branch_manager" && user.branch_id != null
+            ? rows.filter((item) => item.id === user.branch_id)
+            : rows;
+        setBranches(scopedRows);
+      })
+      .catch(() => setBranches([]));
+  }, [user?.role, user?.branch_id]);
 
   useEffect(() => {
     void servicesApi
@@ -79,17 +94,34 @@ export default function AddBookingPage() {
   }, [user?.role, user?.branch_id]);
 
   useEffect(() => {
-    setSelectedBranchId(user?.branch_id ?? "");
-  }, [user?.branch_id]);
+    if (user?.branch_id != null) {
+      setSelectedBranchId(user.branch_id);
+      return;
+    }
+    if (branches.length === 1) {
+      setSelectedBranchId(branches[0].id);
+    }
+  }, [user?.branch_id, branches]);
 
   const branchOptions = useMemo(() => {
-    const ids = new Set<number>();
-    if (user?.branch_id != null) ids.add(user.branch_id);
+    if (branches.length) return branches;
+
+    const fallback = new Map<number, BranchItem>();
+    if (user?.branch_id != null) {
+      fallback.set(user.branch_id, {
+        id: user.branch_id,
+        name: user.branch?.name || user.branch_name || `Branch ${user.branch_id}`
+      });
+    }
     services.forEach((item) => {
-      if (item.branch_id != null) ids.add(item.branch_id);
+      if (item.branch_id == null || fallback.has(item.branch_id)) return;
+      fallback.set(item.branch_id, {
+        id: item.branch_id,
+        name: `Branch ${item.branch_id}`
+      });
     });
-    return Array.from(ids).sort((a, b) => a - b);
-  }, [services, user?.branch_id]);
+    return Array.from(fallback.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [branches, services, user?.branch_id, user?.branch?.name, user?.branch_name]);
 
   const servicePool = useMemo(() => {
     if (!selectedBranchId) return services;
@@ -146,6 +178,10 @@ export default function AddBookingPage() {
     e.preventDefault();
     if (!customerName.trim() || !customerPhone.trim()) {
       toast.error("Please enter customer name and phone");
+      return;
+    }
+    if (!selectedBranchId) {
+      toast.error("Please select a branch");
       return;
     }
     if (!selectedServices.length) {
@@ -207,12 +243,10 @@ export default function AddBookingPage() {
               );
             }}
           >
-            {!user?.branch_id && <option value="">All Branches</option>}
-            {branchOptions.map((id) => (
-              <option key={id} value={id}>
-                {user?.branch_id === id
-                  ? user?.branch?.name || user?.branch_name || `Branch ${id}`
-                  : `Branch ${id}`}
+            {!user?.branch_id && branchOptions.length > 1 && <option value="">Select branch</option>}
+            {branchOptions.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {formatBranchLabel(branch)}
               </option>
             ))}
           </select>
