@@ -1,0 +1,245 @@
+.invoice-print-page {
+  min-height: 100vh;
+  background: #f1f5f9;
+  color: #000;
+  padding: 16px;
+}
+
+#non-printable {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.invoice-toolbar {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.invoice-toolbar button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #1e293b;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.invoice-toolbar .print-btn {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.invoice-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px;
+  font-weight: 600;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.invoice-logo-wrap {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.invoice-logo {
+  display: block;
+  margin: 0 auto;
+  height: 78px;
+  width: auto;
+  max-width: 280px;
+  object-fit: contain;
+  filter: brightness(0);
+}
+
+.invoice-logo-fallback {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.invoice-address {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  font-weight: 600;
+}
+
+.invoice-section {
+  margin-top: 14px;
+}
+
+.invoice-title {
+  margin: 0;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #111;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.customer-table,
+.items-table,
+.totals-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customer-table {
+  margin-top: 6px;
+}
+
+.customer-table td {
+  padding: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.customer-table td:first-child {
+  width: 72px;
+}
+
+.items-table {
+  margin-top: 6px;
+}
+
+.items-table thead th {
+  border-bottom: 1px solid #111;
+  padding: 2px;
+  font-size: 12px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.items-table thead th:last-child,
+.items-table tbody td:last-child,
+.totals-table td:last-child,
+.text-right {
+  text-align: right;
+}
+
+.items-table tbody td {
+  border-bottom: 1px solid #111;
+  padding: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.totals-table {
+  margin-top: 8px;
+}
+
+.totals-table td {
+  padding: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.totals-table .total-row td {
+  font-weight: 700;
+}
+
+.footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footer .powered-by {
+  margin-top: 10px;
+}
+
+.loading-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #475569;
+}
+@media print {
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 80mm;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    background: #fff !important;
+    overflow-x: hidden !important;
+
+    /* LEFT SPACE REMOVE */
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0 !important;
+  }
+
+  #non-printable {
+    display: none !important;
+  }
+
+  .invoice-print-page {
+    min-height: 0 !important;
+    height: auto !important;
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    /* LEFT SPACE REMOVE */
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+
+    page-break-after: avoid;
+  }
+
+  .invoice-shell {
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    /* LEFT ALIGN STRICT */
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    left: 0 !important;
+
+    width: 100% !important;
+    max-width: 80mm !important;
+    box-sizing: border-box !important;
+
+    page-break-inside: avoid;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif !important;
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+release/
+dist/
+dist-electron/
+.env
+.DS_Store
+__MACOSX/
+*.zip
+Archive.zip

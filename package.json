@@ -1,0 +1,95 @@
+{
+  "name": "electron-pos-neeri",
+  "version": "1.9.1",
+  "description": "Electron desktop POS client for Neeri Saloon POS",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev:renderer": "vite",
+    "dev:renderer:clean": "node -e \"require('fs').rmSync('node_modules/.vite',{recursive:true,force:true})\" && vite",
+    "dev:electron": "wait-on tcp:127.0.0.1:5173 && electron .",
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "npm run build:renderer && npm run build:electron",
+    "package:mac": "npm run build && electron-builder --mac",
+    "package:mac:unsigned": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --config.mac.identity=null",
+    "package:mac:unsigned:zip": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac zip --config.mac.identity=null",
+    "package:win": "npm run build && electron-builder --win",
+    "release:mac": "npm run build && electron-builder --mac --publish always",
+    "release:win": "npm run build && electron-builder --win --publish always",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "laravel",
+    "pos"
+  ],
+  "author": "neeri",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.27",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
+    "postcss": "^8.5.9",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^6.0.2",
+    "vite": "^6.4.2",
+    "wait-on": "^9.0.5"
+  },
+  "dependencies": {
+    "axios": "^1.15.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "electron-updater": "^6.8.3",
+    "laravel-echo": "^2.3.4",
+    "react": "^19.2.5",
+    "react-calendar": "^6.0.1",
+    "react-dom": "^19.2.5",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.6.0",
+    "react-router-dom": "^7.14.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "build": {
+    "appId": "com.neeri.salon.desktop",
+    "productName": "Neeri Saloon POS",
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "extraMetadata": {
+      "env": {
+        "VITE_API_BASE_URL": "https://neeri.sloton.app"
+      }
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "eirmoninfo",
+        "repo": "neeri_pos_desktop_app",
+        "releaseType": "release"
+      }
+    ]
+  }
+}
