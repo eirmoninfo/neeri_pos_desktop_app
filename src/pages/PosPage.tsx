@@ -1252,8 +1252,8 @@ const printInvoiceNow = async (invoice: InvoiceItem) => {
                   cart.map((item) => (
                     <tr key={item.id} className="border-b last:border-b-0">
                       <td className="p-2">
-                        <p className="text-xs font-medium leading-snug text-slate-800">{item.service_name}</p>
-                        <p className="text-xs text-slate-500">{item.sub_category}</p>
+                        <p className="text-xs font-medium leading-snug text-slate-800">{item.sub_category || item.service_name}</p>
+                        {item.sub_category ? <p className="text-xs text-slate-500">{item.service_name}</p> : null}
                       </td>
                       <td className="p-2">
                         <input

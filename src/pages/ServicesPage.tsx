@@ -95,8 +95,8 @@ export default function ServicesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="table-head">
+                <th className="p-2">Category</th>
                 <th className="p-2">Service</th>
-                <th className="p-2">Sub Category</th>
                 <th className="p-2">Price</th>
                 <th className="p-2">Time</th>
                 {(canEdit || canDelete) && <th className="p-2">Action</th>}
@@ -171,11 +171,11 @@ export default function ServicesPage() {
           }}
         >
           <div>
-            <label className="field-label">Service Name</label>
+            <label className="field-label">Category</label>
             <input className="field" value={form.service_name} onChange={(e) => setForm((prev) => ({ ...prev, service_name: e.target.value }))} />
           </div>
           <div>
-            <label className="field-label">Sub Category</label>
+            <label className="field-label">Service</label>
             <input className="field" value={form.sub_category} onChange={(e) => setForm((prev) => ({ ...prev, sub_category: e.target.value }))} />
           </div>
           <div>
@@ -228,11 +228,11 @@ export default function ServicesPage() {
           }}
         >
           <div>
-            <label className="field-label">Service Name</label>
+            <label className="field-label">Category</label>
             <input className="field" value={editForm.service_name} onChange={(e) => setEditForm((prev) => ({ ...prev, service_name: e.target.value }))} />
           </div>
           <div>
-            <label className="field-label">Sub Category</label>
+            <label className="field-label">Service</label>
             <input className="field" value={editForm.sub_category} onChange={(e) => setEditForm((prev) => ({ ...prev, sub_category: e.target.value }))} />
           </div>
           <div>

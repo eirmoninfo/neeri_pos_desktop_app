@@ -60,8 +60,10 @@ export interface AnalyticsData {
 
 export interface ServiceItem {
   id: number;
+  /** Category bucket (BODY WAXING, FACIALS, HAIR SERVICES, …) */
   service_name: string;
   services?: string;
+  /** Actual service name within the category */
   sub_category: string;
   price: number;
   time: number;

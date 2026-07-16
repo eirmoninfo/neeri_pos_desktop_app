@@ -8,6 +8,7 @@ import Modal from "../components/Modal";
 import Pagination from "../components/Pagination";
 import { SkeletonRows } from "../components/Skeleton";
 import { useBookingRealtime } from "../realtime/useBookingRealtime";
+import { getServiceCategory, getServiceLabel } from "../utils/serviceLabels";
 
 interface BookingFormState {
   name: string;
@@ -96,7 +97,7 @@ export default function BookingsPage() {
     return services.filter((service) => {
       if (selectedServices.some((row) => row.id === service.id)) return false;
       if (!term) return true;
-      const haystack = `${service.service_name} ${service.sub_category ?? ""}`.toLowerCase();
+      const haystack = `${getServiceCategory(service)} ${getServiceLabel(service)}`.toLowerCase();
       return haystack.includes(term);
     });
   }, [services, serviceSearch, selectedServices]);
@@ -157,7 +158,7 @@ export default function BookingsPage() {
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
-        services: selectedServices.map((row) => row.service_name).join(", "),
+        services: selectedServices.map((row) => getServiceLabel(row)).join(", "),
         total_price: Number(form.total_price || 0),
         notes: form.notes,
         duration: 60,
@@ -353,8 +354,8 @@ export default function BookingsPage() {
                         onClick={() => addService(service)}
                       >
                         <span>
-                          {service.service_name}
-                          {service.sub_category ? ` (${service.sub_category})` : ""}
+                          {getServiceLabel(service)}
+                          {getServiceCategory(service) ? ` (${getServiceCategory(service)})` : ""}
                         </span>
                         <span className="text-xs text-slate-500">${Number(service.price || 0).toFixed(2)}</span>
                       </button>
@@ -375,7 +376,7 @@ export default function BookingsPage() {
                     onClick={() => removeService(service.id)}
                     title="Remove"
                   >
-                    {service.service_name} ×
+                    {getServiceLabel(service)} ×
                   </button>
                 ))}
               </div>

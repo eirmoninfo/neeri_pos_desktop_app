@@ -6,6 +6,7 @@ import { branchesApi, formatBranchLabel } from "../api/branchesApi";
 import { servicesApi } from "../api/servicesApi";
 import { useAuthStore } from "../store/authStore";
 import type { BranchItem, ServiceItem } from "../types";
+import { formatServiceOption, getServiceCategory, getServiceLabel } from "../utils/serviceLabels";
 
 const TIME_SLOTS = [
   "08:00",
@@ -131,8 +132,7 @@ export default function AddBookingPage() {
   const categories = useMemo(() => {
     const names = new Set<string>();
     servicePool.forEach((service) => {
-      const value = service.sub_category?.trim();
-      if (value) names.add(value);
+      names.add(getServiceCategory(service));
     });
     return Array.from(names).sort((a, b) => a.localeCompare(b));
   }, [servicePool]);
@@ -141,7 +141,7 @@ export default function AddBookingPage() {
     return servicePool.filter((service) => {
       if (selectedServices.some((row) => row.id === service.id)) return false;
       if (!selectedCategory) return true;
-      return (service.sub_category ?? "") === selectedCategory;
+      return getServiceCategory(service) === selectedCategory;
     });
   }, [servicePool, selectedCategory, selectedServices]);
 
@@ -206,7 +206,7 @@ export default function AddBookingPage() {
         start_time: start,
         end_time: end,
         duration: totalDuration,
-        services: selectedServices.map((row) => row.service_name).join(", "),
+        services: selectedServices.map((row) => getServiceLabel(row)).join(", "),
         total_price: total,
         notes: notes.trim(),
         branch_id: selectedBranchId || user?.branch_id || undefined
@@ -331,7 +331,7 @@ export default function AddBookingPage() {
               <option value="">Select service</option>
               {filteredServices.map((service) => (
                 <option key={service.id} value={service.id}>
-                  {service.service_name}
+                  {formatServiceOption(service)}
                 </option>
               ))}
             </select>
@@ -358,7 +358,7 @@ export default function AddBookingPage() {
                   onClick={() => removeService(service.id)}
                   title="Remove service"
                 >
-                  {service.service_name} x
+                  {getServiceLabel(service)} x
                 </button>
               ))}
             </div>
