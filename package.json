@@ -1,6 +1,6 @@
 {
   "name": "electron-pos-neeri",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "Electron desktop POS client for Neeri Saloon POS",
   "main": "dist-electron/main.js",
   "scripts": {
