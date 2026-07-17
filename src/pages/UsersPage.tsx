@@ -50,7 +50,7 @@ export default function UsersPage() {
           <p className="text-sm text-slate-500">Manage staff users for your branch.</p>
         </div>
         <div className="flex gap-2">
-          <select className="field max-w-28" value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
+          <select className="field" value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={20}>20</option>

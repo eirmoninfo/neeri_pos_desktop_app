@@ -67,6 +67,7 @@
       "buildResources": "assets",
       "output": "release"
     },
+    "icon": "icon.png",
     "extraMetadata": {
       "env": {
         "VITE_API_BASE_URL": "https://neeri.sloton.app"
@@ -75,13 +76,24 @@
     "files": [
       "dist/**",
       "dist-electron/**",
-      "package.json"
+      "package.json",
+      "assets/icon.png",
+      "assets/icon.ico",
+      "assets/images/logo.png"
     ],
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "icon.png",
+      "category": "public.app-category.business"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico"
     },
     "publish": [
       {

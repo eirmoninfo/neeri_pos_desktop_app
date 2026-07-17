@@ -1,7 +1,8 @@
-import { useState,useCallback } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import type { IconType } from "react-icons";
 import {
+  FiBell,
   FiCalendar,
   FiClock,
   FiCreditCard,
@@ -9,8 +10,10 @@ import {
   FiFileText,
   FiHome,
   FiLayers,
+  FiMapPin,
   FiScissors,
   FiSettings,
+  FiUser,
   FiUsers,
   FiUserPlus
 } from "react-icons/fi";
@@ -26,16 +29,18 @@ interface SidebarLink {
 
 const links = [
   { to: "/dashboard", label: "Dashboard", icon: FiHome },
+  { to: "/branches", label: "Branches", icon: FiMapPin },
   { to: "/customers", label: "Clients", icon: FiUsers },
   { to: "/services", label: "Services", icon: FiScissors },
+  { to: "/invoice", label: "Invoice", icon: FiFileText },
   { to: "/pos", label: "POS", icon: FiCreditCard },
   { to: "/users", label: "Users", icon: FiUsers },
   { to: "/leaves", label: "Leaves", icon: FiLayers },
   { to: "/offers", label: "Offers", icon: FiDollarSign },
   { to: "/time-slots", label: "Time Slots", icon: FiClock },
-  { to: "/invoice", label: "Invoice", icon: FiFileText },
   { to: "/settings", label: "Profile", icon: FiSettings }
 ] satisfies SidebarLink[];
+
 const dashboardLink = links[0];
 const primaryLinks = links.slice(1);
 
@@ -45,12 +50,22 @@ const bookingDropdownLinks = [
   { to: "/expired-bookings", label: "Expired Booking", icon: FiClock }
 ] satisfies SidebarLink[];
 
-function navItemClass(active: boolean, collapsed: boolean) {
-  return `flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-    active
-      ? "bg-white text-[#473e36] shadow-lg"
-      : "text-white/95 hover:bg-white/10 hover:text-white"
-  } ${collapsed ? "justify-center" : "gap-2"}`;
+function pageTitle(pathname: string) {
+  if (pathname.startsWith("/dashboard")) return "Dashboard";
+  if (pathname.startsWith("/add-booking")) return "Add Booking";
+  if (pathname.startsWith("/bookings")) return "Bookings";
+  if (pathname.startsWith("/expired-bookings")) return "Expired Bookings";
+  if (pathname.startsWith("/customers")) return "Clients";
+  if (pathname.startsWith("/services")) return "Services";
+  if (pathname.startsWith("/pos")) return "Point of Sale";
+  if (pathname.startsWith("/users")) return "Users";
+  if (pathname.startsWith("/leaves")) return "Leaves";
+  if (pathname.startsWith("/offers")) return "Offers";
+  if (pathname.startsWith("/time-slots")) return "Time Slots";
+  if (pathname.startsWith("/invoice")) return "Invoice";
+  if (pathname.startsWith("/settings")) return "Profile";
+  if (pathname.startsWith("/branches")) return "Branches";
+  return "Neeri's Cleopatra";
 }
 
 export default function AppLayout() {
@@ -105,50 +120,58 @@ export default function AppLayout() {
     }
   }, []);
 
-  const realtime = useBookingRealtime({
+  useBookingRealtime({
     token,
     role: user?.role,
     branchId: user?.branch_id,
     onBookingCreated: handleBookingCreated
   });
 
+  const roleLabel = (user?.role ?? "User").replace(/_/g, " ");
+
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="flex h-screen overflow-hidden bg-[var(--neeri-cream)]">
       <aside
-        className={`flex h-full flex-col bg-gradient-to-b from-[#5f4d40] via-[#58473a] to-[#43352c] text-white shadow-2xl transition-all duration-300 ${
+        className={`flex h-full flex-col border-r border-[#ebe4da] bg-gradient-to-b from-white via-[#fffaf5] to-[#f5e6d4] shadow-[4px_0_24px_rgba(42,31,24,0.04)] transition-all duration-300 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
-        <div className="px-4 pb-4 pt-4">
+        <div className="px-4 pb-3 pt-4">
           <div className="mb-3 flex justify-end">
             <button
-              className="rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs font-semibold"
+              type="button"
+              className="rounded-lg border border-[#e5d9cb] bg-white/80 px-2 py-1 text-xs font-semibold text-[#5c5046]"
               onClick={() => setCollapsed((prev) => !prev)}
             >
               {collapsed ? ">>" : "<<"}
             </button>
           </div>
-          <div className="rounded-xl border border-white/15 bg-white/5 px-3 py-3">
-            <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
-              <img
-                src={import.meta.env.VITE_INVOICE_LOGO_URL ?? "assets/images/logo.png"}
-                alt="Neeri logo"
-                className="h-10 w-10 shrink-0 rounded-lg bg-white/90 p-1 object-contain"
-              />
-              {!collapsed ? (
-                <div className="min-w-0">
-                  <p className="truncate text-base font-bold tracking-wide">Neeri Salon POS</p>
-                  <p className="truncate text-xs text-white/70">Salon Management Suite</p>
-                </div>
-              ) : null}
-            </div>
+          <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
+            <img
+              src={import.meta.env.VITE_INVOICE_LOGO_URL ?? "assets/images/logo.png"}
+              alt="Neeri logo"
+              className="h-11 w-11 shrink-0 rounded-full border border-[#e8d48b] bg-white object-contain p-1 shadow-sm"
+            />
+            {!collapsed ? (
+              <div className="min-w-0">
+                <p className="font-display truncate text-lg font-semibold leading-tight text-[#2a1f18]">
+                  Neeri&apos;s Cleopatra
+                </p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-wide text-[#8a7b6d]">
+                  Hair & Beauty
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
+
         <div className="sidebar-scroll flex-1 overflow-y-auto px-3 pb-4">
           <nav className="space-y-1.5 pt-1">
             <Link
               to={dashboardLink.to}
-              className={navItemClass(location.pathname === dashboardLink.to, collapsed)}
+              className={`nav-item ${location.pathname === dashboardLink.to ? "nav-item-active" : ""} ${
+                collapsed ? "justify-center" : "gap-2.5"
+              }`}
               title={collapsed ? dashboardLink.label : undefined}
             >
               <dashboardLink.icon className="shrink-0 text-base" />
@@ -159,28 +182,22 @@ export default function AppLayout() {
               <button
                 type="button"
                 onClick={() => setBookingMenuOpen((prev) => !prev)}
-                className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                  collapsed
-                    ? isBookingRoute
-                      ? "justify-center bg-white text-[#473e36] shadow-lg"
-                      : "justify-center text-white/95 hover:bg-white/10 hover:text-white"
-                    : isBookingRoute
-                      ? "gap-2 bg-white/15 text-white hover:bg-white/20"
-                      : "gap-2 text-white/95 hover:bg-white/10 hover:text-white"
+                className={`nav-item ${isBookingRoute ? "nav-item-active" : ""} ${
+                  collapsed ? "justify-center" : "gap-2.5"
                 }`}
                 title={collapsed ? "Bookings" : undefined}
               >
                 <FiCalendar className="shrink-0 text-base" />
                 {!collapsed && (
                   <>
-                    <span className="flex-1 text-left">Bookings</span>
-                    <span className="text-xs opacity-80">{bookingMenuOpen ? "▾" : "▸"}</span>
+                    <span className="flex-1 text-left">Booking</span>
+                    <span className="text-xs opacity-70">{bookingMenuOpen ? "▾" : "▸"}</span>
                   </>
                 )}
               </button>
 
               {!collapsed && bookingMenuOpen ? (
-                <div className="mt-1 ml-4 space-y-1 border-l border-white/25 pl-3">
+                <div className="mt-1 ml-3 space-y-1 border-l border-[#e5d9cb] pl-3">
                   {bookingDropdownLinks.map((link) => {
                     const active = location.pathname === link.to;
                     return (
@@ -189,8 +206,8 @@ export default function AppLayout() {
                         to={link.to}
                         className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition ${
                           active
-                            ? "bg-white text-[#473e36] shadow"
-                            : "text-white/85 hover:bg-white/10 hover:text-white"
+                            ? "bg-white text-[#2a1f18] shadow-sm ring-1 ring-[#c9a227]/30"
+                            : "text-[#6b5e52] hover:bg-white/70 hover:text-[#2a1f18]"
                         }`}
                       >
                         <link.icon className="shrink-0 text-sm" />
@@ -206,7 +223,9 @@ export default function AppLayout() {
                     <Link
                       key={link.to}
                       to={link.to}
-                      className={`${navItemClass(location.pathname === link.to, true)} mt-1`}
+                      className={`nav-item mt-1 justify-center ${
+                        location.pathname === link.to ? "nav-item-active" : ""
+                      }`}
                       title={link.label}
                     >
                       <link.icon className="shrink-0 text-base" />
@@ -215,39 +234,53 @@ export default function AppLayout() {
                 : null}
             </div>
 
-            {primaryLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={navItemClass(location.pathname === link.to, collapsed)}
-                title={collapsed ? link.label : undefined}
-              >
-                <link.icon className="shrink-0 text-base" />
-                {!collapsed && <span>{link.label}</span>}
-              </Link>
-            ))}
+            {primaryLinks.map((link) => {
+              const active = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-item ${active ? "nav-item-active" : ""} ${
+                    collapsed ? "justify-center" : "gap-2.5"
+                  }`}
+                  title={collapsed ? link.label : undefined}
+                >
+                  <link.icon className="shrink-0 text-base" />
+                  {!collapsed && <span>{link.label}</span>}
+                </Link>
+              );
+            })}
           </nav>
         </div>
-        <div className="border-t border-white/10 p-4">
+
+        <div className="border-t border-[#ebe4da] p-4">
           <button onClick={() => void logout()} className="btn-danger w-full">
             {collapsed ? "Out" : "Logout"}
           </button>
         </div>
       </aside>
+
       <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="flex shrink-0 items-center justify-between border-b bg-white/95 px-6 py-4 backdrop-blur">
-          <h2 className="text-lg font-semibold text-slate-800">Neeri Saloon POS</h2>
+        <div className="flex shrink-0 items-center justify-between border-b border-[#ebe4da] bg-white/90 px-6 py-3.5 backdrop-blur">
+          <div>
+            <h2 className="text-lg font-semibold text-[#2a1f18]">{pageTitle(location.pathname)}</h2>
+            <p className="text-xs text-[#8a7b6d]">Neeri&apos;s Cleopatra Hair & Beauty</p>
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#ebe4da] bg-white text-[#5c5046] hover:bg-[#faf7f2]"
               onClick={() => void handleCheckUpdates()}
+              title="Check for updates"
             >
-              Check for updates
+              <FiBell />
             </button>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              {user?.role ?? "User"}
-            </span>
+            <div className="flex items-center gap-2 rounded-full border border-[#ebe4da] bg-[#faf7f2] py-1.5 pl-1.5 pr-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#c9a227]/20 text-[#8a6b12]">
+                <FiUser />
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#5c5046]">{roleLabel}</span>
+            </div>
           </div>
         </div>
         <div

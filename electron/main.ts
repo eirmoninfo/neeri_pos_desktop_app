@@ -15,6 +15,15 @@ const UPDATE_OWNER = "eirmoninfo";
 const UPDATE_REPO = "neeri_pos_desktop_app";
 const execFileAsync = promisify(execFile);
 
+function resolveAppIconPath() {
+  const candidates = [
+    path.join(app.getAppPath(), "assets", "icon.png"),
+    path.join(__dirname, "..", "assets", "icon.png"),
+    path.join(process.cwd(), "assets", "icon.png")
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? undefined;
+}
+
 interface PrinterInfo {
   name: string;
   isDefault?: boolean;
@@ -393,16 +402,22 @@ async function printHtmlSilent(printerName: string, html: string) {
 
 
 function createWindow() {
+  const iconPath = resolveAppIconPath();
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
     title: "Neeri Saloon POS",
+    ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
      preload: path.join(app.getAppPath(), "dist-electron/preload.js"),
       contextIsolation: true,
       nodeIntegration: false
     }
   });
+
+  if (process.platform === "darwin" && iconPath && app.dock) {
+    app.dock.setIcon(iconPath);
+  }
 
   if (!app.isPackaged) {
     win.loadURL("http://localhost:5173");
@@ -430,7 +445,12 @@ app.whenReady().then(() => {
     const title = (payload?.title ?? "Notification").trim() || "Notification";
     const body = (payload?.body ?? "").trim();
     if (Notification.isSupported()) {
-      new Notification({ title, body }).show();
+      const iconPath = resolveAppIconPath();
+      new Notification({
+        title,
+        body,
+        ...(iconPath ? { icon: iconPath } : {})
+      }).show();
       return { ok: true, message: "Notification shown." };
     }
     return { ok: false, message: "System notifications are not supported on this device." };

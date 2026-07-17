@@ -2,15 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --neeri-gold: #c9a227;
+  --neeri-gold-bright: #d4af37;
+  --neeri-gold-soft: #e8d48b;
+  --neeri-brown: #2a1f18;
+  --neeri-brown-mid: #473e36;
+  --neeri-cream: #f7f3ee;
+  --neeri-peach: #f3e6d8;
+  --neeri-blue: #3b82f6;
+  --neeri-sidebar-top: #ffffff;
+  --neeri-sidebar-bottom: #f5e6d4;
+}
+
 body {
-  @apply bg-slate-100 text-slate-800 antialiased;
-  font-family:
-    Inter,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  background: var(--neeri-cream);
+  color: var(--neeri-brown-mid);
+  -webkit-font-smoothing: antialiased;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
 }
 
 @media (max-width: 1100px) and (max-height: 1100px) {
@@ -31,14 +40,18 @@ body {
 }
 
 .font-logo {
-  font-family: "Great Vibes", "Brush Script MT", "Segoe Script", cursive;
+  font-family: "Cormorant Garamond", "Great Vibes", Georgia, serif;
+}
+
+.font-display {
+  font-family: "Cormorant Garamond", Georgia, serif;
 }
 
 .skeleton {
   position: relative;
   overflow: hidden;
-  border-radius: 0.5rem;
-  background: #e2e8f0;
+  border-radius: 0.75rem;
+  background: #e8e0d6;
 }
 
 .skeleton::after {
@@ -46,7 +59,7 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
   animation: skeleton-shimmer 1.3s infinite;
 }
 
@@ -68,35 +81,45 @@ body {
 
 @layer components {
   .panel {
-    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+    @apply rounded-[1.25rem] border border-[#ebe4da] bg-white shadow-[0_8px_30px_rgba(42,31,24,0.06)];
   }
 
   .panel-title {
-    @apply text-2xl font-semibold tracking-tight text-slate-900;
+    @apply text-2xl font-semibold tracking-tight text-[#2a1f18];
   }
 
   .btn-primary {
-    @apply rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700;
+    @apply rounded-xl px-4 py-2.5 text-sm font-semibold text-[#2a1f18] transition;
+    background: linear-gradient(135deg, #d4af37 0%, #c9a227 55%, #b8941f 100%);
+    box-shadow: 0 8px 18px rgba(201, 162, 39, 0.28);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.04);
+  }
+
+  .btn-primary:disabled {
+    @apply cursor-not-allowed opacity-60;
   }
 
   .btn-danger {
-    @apply rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-600;
+    @apply rounded-xl bg-rose-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-600;
   }
 
   .field {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100;
+    @apply w-full rounded-xl border border-[#dbe7f5] bg-[#f4f8fc] px-3 py-2.5 text-sm text-[#2a1f18] outline-none transition focus:border-[#c9a227] focus:bg-white focus:ring-2 focus:ring-[#c9a227]/20;
   }
 
   .field-label {
-    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[#6b5e52];
   }
 
   .table-wrap {
-    @apply overflow-x-auto rounded-lg border border-slate-200;
+    @apply overflow-x-auto rounded-xl border border-[#ebe4da];
   }
 
   .table-head {
-    @apply border-b bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply border-b border-[#ebe4da] bg-[#faf7f2] text-left text-xs font-semibold uppercase tracking-wide text-[#6b5e52];
   }
 
   .cell-truncate {
@@ -105,7 +128,7 @@ body {
 
   .sidebar-scroll {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+    scrollbar-color: rgba(201, 162, 39, 0.45) transparent;
   }
 
   .sidebar-scroll::-webkit-scrollbar {
@@ -118,41 +141,143 @@ body {
 
   .sidebar-scroll::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(201, 162, 39, 0.4);
   }
 
   .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(201, 162, 39, 0.55);
   }
+
+  .nav-item {
+    @apply flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium text-[#5c5046] transition;
+  }
+
+  .nav-item:hover {
+    @apply bg-white/70 text-[#2a1f18];
+  }
+
+  .nav-item-active {
+    @apply bg-white text-[#2a1f18] shadow-[0_6px_18px_rgba(201,162,39,0.18)];
+    border: 1px solid rgba(201, 162, 39, 0.35);
+  }
+
+  .stat-wave {
+    height: 28px;
+    width: 100%;
+    margin-top: 0.75rem;
+    border-radius: 0 0 1.25rem 1.25rem;
+    opacity: 0.9;
+  }
+}
+
+.login-arcs {
+  background-image: radial-gradient(circle at 20% 80%, transparent 0, transparent 38%, rgba(212, 175, 55, 0.12) 39%, transparent 41%),
+    radial-gradient(circle at 20% 80%, transparent 0, transparent 52%, rgba(212, 175, 55, 0.1) 53%, transparent 55%),
+    radial-gradient(circle at 20% 80%, transparent 0, transparent 66%, rgba(212, 175, 55, 0.08) 67%, transparent 69%),
+    radial-gradient(circle at 20% 80%, transparent 0, transparent 80%, rgba(212, 175, 55, 0.06) 81%, transparent 83%);
 }
 
 .booking-calendar .react-calendar {
   width: 100%;
   border: 0;
+  background: transparent;
   font-family: inherit;
+  line-height: 1.2;
+}
+
+.booking-calendar .react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.booking-calendar .react-calendar__navigation__label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  pointer-events: none;
 }
 
 .booking-calendar .react-calendar__navigation button {
-  border-radius: 8px;
-  color: rgb(109 40 217);
+  border-radius: 10px;
+  color: #4b5563;
   font-weight: 600;
+  min-width: 36px;
+  background: transparent;
+}
+
+.booking-calendar .react-calendar__navigation button:enabled:hover,
+.booking-calendar .react-calendar__navigation button:enabled:focus {
+  background: #f3f4f6;
+}
+
+.booking-calendar .react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+}
+
+.booking-calendar .react-calendar__month-view__weekdays__weekday {
+  padding: 0.4rem 0;
+}
+
+.booking-calendar .react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
 }
 
 .booking-calendar .react-calendar__tile {
-  border-radius: 8px;
-  font-size: 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+  padding: 0.7rem 0.35rem;
+  position: relative;
+  background: transparent;
+}
+
+.booking-calendar .react-calendar__tile:enabled:hover {
+  background: #eff6ff;
+}
+
+.booking-calendar .react-calendar__tile--now {
+  background: #f3f4f6;
+  font-weight: 700;
 }
 
 .booking-calendar .react-calendar__tile--active {
-  background: rgb(109 40 217);
-  color: white;
+  background: #3b82f6 !important;
+  color: white !important;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+}
+
+.booking-calendar .react-calendar__tile.has-bookings::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: #8b5cf6;
+}
+
+.booking-calendar .react-calendar__tile--active.has-bookings::after {
+  background: #ffffff;
+}
+
+.booking-calendar .react-calendar__month-view__days__day--neighboringMonth {
+  color: #d1d5db;
 }
 
 .btn-spinner {
   width: 0.9rem;
   height: 0.9rem;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-top-color: #ffffff;
+  border: 2px solid rgba(42, 31, 24, 0.25);
+  border-top-color: #2a1f18;
   border-radius: 9999px;
   display: inline-block;
   animation: btn-spin 0.7s linear infinite;

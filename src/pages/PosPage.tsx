@@ -241,7 +241,12 @@ export default function PosPage() {
         .map((service) => (service.service_name || "General").trim())
         .filter((value) => value.length > 0)
     );
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    set.add("Miscellaneous");
+    return Array.from(set).sort((a, b) => {
+      if (a === "Miscellaneous") return 1;
+      if (b === "Miscellaneous") return -1;
+      return a.localeCompare(b);
+    });
   }, [services]);
 
   const filteredCategories = useMemo(() => {
@@ -308,11 +313,7 @@ const serviceTileRows = useMemo(() => {
   };
 
   const addMiscService = () => {
-    if (!selectedCategory) {
-      toast.error("Please select a category first");
-      return;
-    }
-
+    const category = selectedCategory || "Miscellaneous";
     const price = Number(miscPrice);
     if (!Number.isFinite(price) || price <= 0) {
       toast.error("Please enter a valid price");
@@ -321,9 +322,9 @@ const serviceTileRows = useMemo(() => {
 
     const customItem: CartItem = {
       id: -Date.now(),
-      service_name: selectedCategory,
-      services: selectedCategory,
-      sub_category: "Miscellaneous",
+      service_name: category,
+      services: category,
+      sub_category: category === "Miscellaneous" ? "Custom charge" : "Miscellaneous",
       price,
       time: 0,
       qty: 1
@@ -643,6 +644,10 @@ const handleEftposPayment = async () => {
 };
 const getServiceColor = (service: string) => {
   const name = `${service}`.toLowerCase();
+
+  if (name.includes("misc") || name.includes("miscellaneous")) {
+    return "bg-violet-600";
+  }
 
   if (name.includes("malificent") || name.includes("product")) {
     return "bg-[#9b59b6]"; // Purple for retail / Malificent
