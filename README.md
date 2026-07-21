@@ -91,6 +91,8 @@ Dev mode never auto-updates (`Auto-updater is disabled in development mode`).
 - [x] `DELETE /api/services/{id}`
 - [x] `GET /api/localdata/booking-view`
 - [x] `POST /api/bookings/admin`
+- [x] `PUT /api/bookings/admin/{id}` (see `backend/laravel/`)
+- [x] `PUT /api/localdata/bookings/{id}` (see `backend/laravel/`)
 - [x] `POST /api/bookings/check-availability`
 - [x] `GET /api/localdata/dashboard`
 - [x] `GET /api/localdata/analytics`

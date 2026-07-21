@@ -85,7 +85,9 @@ export interface BookingItem {
   end_time: string;
   duration?: number;
   services?: string;
+  sub_category?: string;
   total_price?: number;
+  price?: number | string;
   notes?: string;
   status?: string;
   branch_id?: number;

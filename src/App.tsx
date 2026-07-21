@@ -13,6 +13,7 @@ const BookingsPage = lazy(() => import("./pages/BookingsPage"));
 const CustomersPage = lazy(() => import("./pages/CustomersPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const AddBookingPage = lazy(() => import("./pages/AddBookingPage"));
+const EditBookingPage = lazy(() => import("./pages/EditBookingPage"));
 const SimplePage = lazy(() => import("./pages/SimplePage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 const LeavesPage = lazy(() => import("./pages/LeavesPage"));
@@ -81,6 +82,14 @@ export default function App() {
           element={
             <LazyPage>
               <AddBookingPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/bookings/edit/:id"
+          element={
+            <LazyPage>
+              <EditBookingPage />
             </LazyPage>
           }
         />

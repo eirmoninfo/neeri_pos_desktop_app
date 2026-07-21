@@ -6,7 +6,7 @@ import { branchesApi, formatBranchLabel } from "../api/branchesApi";
 import { servicesApi } from "../api/servicesApi";
 import { useAuthStore } from "../store/authStore";
 import type { BranchItem, ServiceItem } from "../types";
-import { formatServiceOption, getServiceCategory, getServiceLabel } from "../utils/serviceLabels";
+import { getServiceCategory, getServiceLabel } from "../utils/serviceLabels";
 
 const TIME_SLOTS = [
   "08:00",
@@ -53,7 +53,7 @@ function addMinutesToTime(time24: string, minutesToAdd: number) {
 export default function AddBookingPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const serviceSelectRef = useRef<HTMLSelectElement>(null);
+  const serviceBoxRef = useRef<HTMLDivElement>(null);
   const [branches, setBranches] = useState<BranchItem[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<number | "">(user?.branch_id ?? "");
@@ -62,8 +62,8 @@ export default function AddBookingPage() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedServiceId, setSelectedServiceId] = useState<number | "">("");
+  const [serviceSearch, setServiceSearch] = useState("");
+  const [serviceOpen, setServiceOpen] = useState(false);
   const [date, setDate] = useState(todayISO);
   const [time, setTime] = useState("09:00");
   const [submitting, setSubmitting] = useState(false);
@@ -93,6 +93,16 @@ export default function AddBookingPage() {
       })
       .catch(() => setServices([]));
   }, [user?.role, user?.branch_id]);
+
+  useEffect(() => {
+    const onClickOutside = (event: MouseEvent) => {
+      if (!serviceBoxRef.current?.contains(event.target as Node)) {
+        setServiceOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
   useEffect(() => {
     if (user?.branch_id != null) {
@@ -129,21 +139,15 @@ export default function AddBookingPage() {
     return services.filter((service) => service.branch_id == null || service.branch_id === selectedBranchId);
   }, [services, selectedBranchId]);
 
-  const categories = useMemo(() => {
-    const names = new Set<string>();
-    servicePool.forEach((service) => {
-      names.add(getServiceCategory(service));
-    });
-    return Array.from(names).sort((a, b) => a.localeCompare(b));
-  }, [servicePool]);
-
   const filteredServices = useMemo(() => {
+    const term = serviceSearch.trim().toLowerCase();
     return servicePool.filter((service) => {
       if (selectedServices.some((row) => row.id === service.id)) return false;
-      if (!selectedCategory) return true;
-      return getServiceCategory(service) === selectedCategory;
+      if (!term) return true;
+      const haystack = `${getServiceCategory(service)} ${getServiceLabel(service)}`.toLowerCase();
+      return haystack.includes(term);
     });
-  }, [servicePool, selectedCategory, selectedServices]);
+  }, [servicePool, serviceSearch, selectedServices]);
 
   const total = useMemo(() => selectedServices.reduce((sum, row) => sum + Number(row.price || 0), 0), [selectedServices]);
   const totalDuration = useMemo(
@@ -153,25 +157,12 @@ export default function AddBookingPage() {
 
   const addService = (service: ServiceItem) => {
     setSelectedServices((prev) => (prev.some((row) => row.id === service.id) ? prev : [...prev, service]));
-    setSelectedServiceId("");
-    serviceSelectRef.current?.focus();
+    setServiceSearch("");
+    setServiceOpen(false);
   };
 
   const removeService = (id: number) => {
     setSelectedServices((prev) => prev.filter((row) => row.id !== id));
-  };
-
-  const addSelectedService = () => {
-    if (!selectedServiceId) {
-      toast.error("Please select service");
-      return;
-    }
-    const selected = filteredServices.find((item) => item.id === selectedServiceId);
-    if (!selected) {
-      toast.error("Selected service is not available");
-      return;
-    }
-    addService(selected);
   };
 
   const submitBooking = async (e: FormEvent) => {
@@ -236,8 +227,8 @@ export default function AddBookingPage() {
             onChange={(e) => {
               const value = e.target.value ? Number(e.target.value) : "";
               setSelectedBranchId(value);
-              setSelectedCategory("");
-              setSelectedServiceId("");
+              setServiceSearch("");
+              setServiceOpen(false);
               setSelectedServices((prev) =>
                 value ? prev.filter((item) => item.branch_id == null || item.branch_id === value) : prev
               );
@@ -295,80 +286,90 @@ export default function AddBookingPage() {
           />
         </div>
 
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
-          <div>
-            <label className="field-label" htmlFor="category">
-              Category
-            </label>
-            <select
-              id="category"
+        <div ref={serviceBoxRef}>
+          <label className="field-label" htmlFor="service-search">
+            Services
+          </label>
+          <div className="relative">
+            <input
+              id="service-search"
               className="field"
-              value={selectedCategory}
+              value={serviceSearch}
+              placeholder="Search services or click to see all…"
+              autoComplete="off"
+              onFocus={() => setServiceOpen(true)}
               onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setSelectedServiceId("");
+                setServiceSearch(e.target.value);
+                setServiceOpen(true);
               }}
-            >
-              <option value="">Select category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
+            {serviceOpen ? (
+              <div className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+                {filteredServices.length ? (
+                  filteredServices.map((service) => (
+                    <button
+                      key={service.id}
+                      type="button"
+                      className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm hover:bg-slate-50"
+                      onClick={() => addService(service)}
+                    >
+                      <span>
+                        <span className="font-medium text-slate-800">{getServiceLabel(service)}</span>
+                        {getServiceCategory(service) ? (
+                          <span className="ml-1 text-xs text-slate-500">({getServiceCategory(service)})</span>
+                        ) : null}
+                      </span>
+                      <span className="shrink-0 text-xs font-semibold text-slate-500">
+                        ${Number(service.price || 0).toFixed(2)}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3 py-3 text-sm text-slate-500">
+                    {serviceSearch.trim() ? "No matching services" : "No services available"}
+                  </p>
+                )}
+              </div>
+            ) : null}
           </div>
-          <div>
-            <label className="field-label" htmlFor="service">
-              Service
-            </label>
-            <select
-              id="service"
-              ref={serviceSelectRef}
-              className="field"
-              value={selectedServiceId}
-              onChange={(e) => setSelectedServiceId(e.target.value ? Number(e.target.value) : "")}
-            >
-              <option value="">Select service</option>
-              {filteredServices.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {formatServiceOption(service)}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button
-              type="button"
-              className="rounded-lg border border-blue-300 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
-              onClick={addSelectedService}
-            >
-              Add Service
-            </button>
-          </div>
-        </div>
 
-        {selectedServices.length ? (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="flex flex-wrap gap-2">
-              {selectedServices.map((service) => (
-                <button
-                  key={service.id}
-                  type="button"
-                  className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
-                  onClick={() => removeService(service.id)}
-                  title="Remove service"
-                >
-                  {getServiceLabel(service)} x
-                </button>
-              ))}
+          {selectedServices.length ? (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="space-y-2">
+                {selectedServices.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-200"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-800">{getServiceLabel(service)}</p>
+                      {getServiceCategory(service) ? (
+                        <p className="truncate text-xs text-slate-500">{getServiceCategory(service)}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <span className="text-sm font-semibold text-slate-700">
+                        ${Number(service.price || 0).toFixed(2)}
+                      </span>
+                      <button
+                        type="button"
+                        className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                        onClick={() => removeService(service.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-sm font-medium text-slate-600">
+                Total: ${total.toFixed(2)} · Duration: {totalDuration} min
+              </p>
             </div>
-            <p className="mt-2 text-sm text-slate-600">
-              Total: ${total.toFixed(2)} | Duration: {totalDuration} min
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm text-slate-500">No service added yet.</p>
-        )}
+          ) : (
+            <p className="mt-2 text-sm text-slate-500">No service added yet.</p>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>

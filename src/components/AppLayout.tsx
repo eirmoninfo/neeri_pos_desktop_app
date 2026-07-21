@@ -53,6 +53,7 @@ const bookingDropdownLinks = [
 function pageTitle(pathname: string) {
   if (pathname.startsWith("/dashboard")) return "Dashboard";
   if (pathname.startsWith("/add-booking")) return "Add Booking";
+  if (pathname.startsWith("/bookings/edit")) return "Edit Booking";
   if (pathname.startsWith("/bookings")) return "Bookings";
   if (pathname.startsWith("/expired-bookings")) return "Expired Bookings";
   if (pathname.startsWith("/customers")) return "Clients";
@@ -76,7 +77,7 @@ export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [bookingMenuOpen, setBookingMenuOpen] = useState(true);
   const isPosRoute = location.pathname === "/pos";
-  const isBookingRoute = bookingDropdownLinks.some((link) => location.pathname === link.to);
+  const isBookingRoute = bookingDropdownLinks.some((link) => location.pathname === link.to) || location.pathname.startsWith("/bookings/edit");
 
   const handleCheckUpdates = async () => {
     if (!window.desktopApi?.checkForUpdates) {

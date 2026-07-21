@@ -209,7 +209,13 @@ function sanitizeUpdaterMessage(raw: string): string {
 
   const lower = text.toLowerCase();
   if (lower.includes("404") || lower.includes("releases.atom") || lower.includes("authentication token")) {
-    return `Could not reach GitHub releases for ${UPDATE_OWNER}/${UPDATE_REPO}. Confirm the repo exists, a release is published, and GH_TOKEN has access if the repo is private.`;
+    if (process.platform === "darwin") {
+      return `No macOS update found on GitHub (${UPDATE_OWNER}/${UPDATE_REPO}). Publish a Mac release with latest-mac.yml and a .dmg (run: GH_TOKEN=... npm run release:mac). Windows-only releases will show this error on Mac.`;
+    }
+    if (process.platform === "win32") {
+      return `No Windows update found on GitHub (${UPDATE_OWNER}/${UPDATE_REPO}). Publish a Windows release with latest.yml and the .exe installer (run: npm run release:win with GH_TOKEN set).`;
+    }
+    return `Could not reach GitHub releases for ${UPDATE_OWNER}/${UPDATE_REPO}. Confirm a release exists for this platform and the repo is public (or GH_TOKEN is set for private repos).`;
   }
   if (lower.includes("403")) {
     return "GitHub rejected the update check (403). Verify GH_TOKEN scopes include repo access.";
