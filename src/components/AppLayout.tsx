@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import type { IconType } from "react-icons";
 import {
@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import { playBookingAlertBeep, unlockBookingAlertAudio } from "../realtime/bookingAlertSound";
 import { useBookingRealtime } from "../realtime/useBookingRealtime";
 
 interface SidebarLink {
@@ -93,25 +94,7 @@ export default function AppLayout() {
   };
 
   const handleBookingCreated = useCallback(async () => {
-    const AudioCtx =
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (AudioCtx) {
-      const context = new AudioCtx();
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.value = 920;
-      gainNode.gain.value = 0.08;
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.18);
-      oscillator.onended = () => {
-        void context.close();
-      };
-    }
-
+    await playBookingAlertBeep();
     toast.success("New booking arrived");
     if (typeof window.desktopApi?.notify === "function") {
       await window.desktopApi.notify({
@@ -127,6 +110,18 @@ export default function AppLayout() {
     branchId: user?.branch_id,
     onBookingCreated: handleBookingCreated
   });
+
+  useEffect(() => {
+    const unlock = () => {
+      void unlockBookingAlertAudio();
+    };
+    document.addEventListener("pointerdown", unlock, { once: true });
+    document.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      document.removeEventListener("pointerdown", unlock);
+      document.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   const roleLabel = (user?.role ?? "User").replace(/_/g, " ");
 

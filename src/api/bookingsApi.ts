@@ -87,9 +87,14 @@ export function normalizeBooking(raw: unknown): BookingItem {
     ) || pickString(record.sub_category);
 
   const rawPrice = record.total_price ?? record.price ?? record.amount;
+  const isAdmin =
+    record.is_admin_booking === true ||
+    record.is_admin_booking === 1 ||
+    record.is_admin_booking === "1" ||
+    String(record.source || "").toLowerCase() === "admin";
 
   return {
-    ...(record as BookingItem),
+    ...(record as unknown as BookingItem),
     id: Number(record.id),
     name: pickString(record.name, record.customer_name, record.client_name),
     phone: pickString(record.phone, record.mobile, record.contact),
@@ -99,11 +104,14 @@ export function normalizeBooking(raw: unknown): BookingItem {
     start_time: pickString(record.start_time, record.time),
     end_time: pickString(record.end_time),
     services,
+    service: services,
     total_price:
       rawPrice != null && String(rawPrice).trim() !== "" ? Number(rawPrice) : undefined,
     notes: pickString(record.notes, record.note, record.message) || undefined,
     status: pickString(record.status) || undefined,
-    branch_id: record.branch_id != null ? Number(record.branch_id) : undefined
+    branch_id: record.branch_id != null ? Number(record.branch_id) : undefined,
+    is_admin_booking: isAdmin,
+    source: isAdmin ? "admin" : "online"
   };
 }
 
@@ -129,6 +137,10 @@ async function putWithFallback(id: number, payload: Partial<BookingItem>) {
 export const bookingsApi = {
   list: async (params: Record<string, unknown>) => {
     const response = await apiClient.get("/api/localdata/booking-view", { params });
+    return normalizeListResponse<BookingItem>(response.data).map((item) => normalizeBooking(item));
+  },
+  expired: async (params: Record<string, unknown> = {}) => {
+    const response = await apiClient.get("/api/localdata/expiry-table", { params });
     return normalizeListResponse<BookingItem>(response.data).map((item) => normalizeBooking(item));
   },
   show: async (id: number): Promise<BookingItem> => {

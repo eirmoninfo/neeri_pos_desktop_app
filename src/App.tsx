@@ -14,6 +14,7 @@ const CustomersPage = lazy(() => import("./pages/CustomersPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const AddBookingPage = lazy(() => import("./pages/AddBookingPage"));
 const EditBookingPage = lazy(() => import("./pages/EditBookingPage"));
+const ExpiredBookingsPage = lazy(() => import("./pages/ExpiredBookingsPage"));
 const SimplePage = lazy(() => import("./pages/SimplePage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 const LeavesPage = lazy(() => import("./pages/LeavesPage"));
@@ -105,7 +106,7 @@ export default function App() {
           path="/expired-bookings"
           element={
             <LazyPage>
-              <SimplePage title="Expired Booking" description="Track and manage expired bookings here." />
+              <ExpiredBookingsPage />
             </LazyPage>
           }
         />

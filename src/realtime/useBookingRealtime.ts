@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { BookingItem, UserRole } from "../types";
-import { acquireEchoClient, releaseEchoClient } from "./echoClient";
+import { acquireEchoClient, getEchoConsumerCount, releaseEchoClient } from "./echoClient";
 
 export interface BookingRealtimePayload {
   booking_id: number;
@@ -100,33 +100,51 @@ export function useBookingRealtime({
       setConnectionState(states.current);
       setIsConnected(states.current === "connected");
     };
+    const handleError = (err: unknown) => {
+      console.warn("[realtime] pusher error", err);
+    };
 
     pusherConnection.bind("connected", handleConnected);
     pusherConnection.bind("disconnected", handleDisconnected);
     pusherConnection.bind("state_change", handleStateChange);
+    pusherConnection.bind("error", handleError);
+    setConnectionState(pusherConnection.state);
+    setIsConnected(pusherConnection.state === "connected");
 
     const receivedAt = () => new Date().toISOString();
     const privateNames = channelNames.map((channelName) => `private-${channelName}`);
     setSubscribedChannels(privateNames);
 
+    const handler = (payload: BookingRealtimePayload) => {
+      setLastEventAt(receivedAt());
+      const booking = toBookingItem(payload);
+      onBookingCreatedRef.current?.(booking, payload);
+    };
+
     channelNames.forEach((channelName) => {
-      echo
-        .private(channelName)
-        .listen(".BookingCreated", (payload: BookingRealtimePayload) => {
-          setLastEventAt(receivedAt());
-          const booking = toBookingItem(payload);
-          onBookingCreatedRef.current?.(booking, payload);
-        });
+      echo.private(channelName).listen(".BookingCreated", handler);
     });
 
     return () => {
       channelNames.forEach((channelName) => {
-        echo.leave(`private-${channelName}`);
+        try {
+          echo.private(channelName).stopListening(".BookingCreated", handler);
+        } catch {
+          // Channel may already be gone during disconnect.
+        }
       });
+
       pusherConnection.unbind("connected", handleConnected);
       pusherConnection.unbind("disconnected", handleDisconnected);
       pusherConnection.unbind("state_change", handleStateChange);
-      releaseEchoClient();
+      pusherConnection.unbind("error", handleError);
+
+      // Only disconnect when no other page/layout still needs Echo.
+      // Leaving channels here used to kill the AppLayout beep listener.
+      const fullyReleased = releaseEchoClient();
+      if (!fullyReleased && getEchoConsumerCount() > 0) {
+        // Shared connection kept alive for remaining consumers.
+      }
     };
   }, [token, channelKey]);
 
@@ -137,4 +155,3 @@ export function useBookingRealtime({
     lastEventAt
   };
 }
-

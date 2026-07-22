@@ -85,12 +85,16 @@ export interface BookingItem {
   end_time: string;
   duration?: number;
   services?: string;
+  service?: string;
   sub_category?: string;
   total_price?: number;
   price?: number | string;
   notes?: string;
+  message?: string;
   status?: string;
   branch_id?: number;
+  is_admin_booking?: boolean;
+  source?: "admin" | "online" | string;
 }
 
 export interface CustomerItem {
